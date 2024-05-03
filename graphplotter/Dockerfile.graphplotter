@@ -1,0 +1,19 @@
+# ベースイメージの指定
+FROM ubuntu:latest
+
+# 必要なパッケージのインストール
+RUN apt-get update -y 
+RUN apt-get install -y inotify-tools
+RUN apt-get install -y gnuplot
+RUN rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/scripts
+
+# シェルスクリプトをコピー
+COPY ./graphplotter/watch_directory.sh /usr/local/bin/
+
+# スクリプトを実行可能にする
+RUN chmod +x /usr/local/bin/watch_directory.sh
+
+# コンテナ起動時に監視するディレクトリを指定してシェルスクリプトを実行
+CMD ["watch_directory.sh"]

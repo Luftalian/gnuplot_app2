@@ -1,0 +1,21 @@
+# 使用するベースイメージ
+FROM node:latest
+
+# コンテナ内での作業ディレクトリを設定
+WORKDIR /app
+
+# ローカルのファイルをコンテナにコピー
+COPY frontend/package.json ./
+COPY frontend/package-lock.json ./
+
+# 必要なnpmパッケージのインストール
+RUN npm install
+
+# 他のファイルをコピー
+COPY frontend .
+
+# アプリケーションのビルド
+RUN npm run build
+
+# アプリケーションを実行
+CMD ["npm", "run", "serve"]
