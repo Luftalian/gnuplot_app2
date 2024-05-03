@@ -20,7 +20,7 @@ func main() {
 
 	// CORS middleware with custom options
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://192.168.1.7:8082", "http://localhost:8082", "https://gnuplotapp2f.trap.show/"},
+		AllowOrigins: []string{"http://192.168.1.7:8082", "http://localhost:8082", "https://gnuplotapp2f.trap.show"},
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
