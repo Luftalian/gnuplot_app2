@@ -38,3 +38,6 @@ RUN chmod +x /usr/local/bin/watch_directory.sh
 # 監視するディレクトリを指定してシェルスクリプトを実行
 WORKDIR /app/scripts
 CMD ["watch_directory.sh"]
+
+# なんかうまくいかなかったので、
+# sshしてから./mainを実行した
