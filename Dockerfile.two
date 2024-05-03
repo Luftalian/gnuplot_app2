@@ -40,4 +40,5 @@ WORKDIR /app/scripts
 CMD ["watch_directory.sh"]
 
 # なんかうまくいかなかったので、
-# sshしてから/app/backend/mainを実行した
+# sshしてから`/app/backend/main`を実行した
+# `mkdir /app/images`も
