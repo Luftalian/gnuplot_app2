@@ -1,0 +1,61 @@
+# ビルド環境用のマルチステージビルド
+FROM golang:latest as builder
+
+WORKDIR /app/backend
+
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
+ENV GOCACHE=/root/.cache/go-build
+ENV GOMODCACHE=/go/pkg/mod
+
+# go.modとgo.sumを先にコピーして依存関係をキャッシュする
+COPY ./backend/v2/go.mod ./backend/v2/go.sum ./
+RUN --mount=type=cache,target=${GOCACHE} \
+  --mount=type=cache,target=${GOMODCACHE} \
+  go mod download
+
+# ソースコードをコピーしてビルド
+COPY ./backend/v2 ./
+RUN --mount=type=cache,target=${GOCACHE} \
+  --mount=type=cache,target=${GOMODCACHE} \
+  go build -o /app/backend/main
+
+# ランタイム環境の定義
+FROM gcr.io/distroless/static-debian11:latest
+
+# backendのバイナリをコピー
+COPY --from=builder /app/backend/main /app/main
+
+# backendで使用するイメージをコピー
+COPY ./images /app/images
+
+# backendを起動する
+CMD ["/app/main"]
+
+# graphplotterのセットアップ
+FROM ubuntu:latest
+
+RUN apt-get update -y \
+  && apt-get install -y inotify-tools gnuplot \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/scripts
+
+COPY ./graphplotter/watch_directory.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/watch_directory.sh
+
+CMD ["watch_directory.sh"]
+
+# frontendのセットアップ
+FROM node:14-alpine
+
+WORKDIR /app
+
+COPY frontend/package.json ./
+COPY frontend/package-lock.json ./
+RUN npm install --production
+
+COPY frontend/dist ./dist
+
+CMD ["npm", "run", "start"]
