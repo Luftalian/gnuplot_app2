@@ -1,0 +1,18 @@
+# 使用するベースイメージ
+FROM node:14-alpine
+
+# コンテナ内での作業ディレクトリを設定
+WORKDIR /app
+
+# ローカルのファイルをコンテナにコピー
+COPY frontend/package.json ./
+COPY frontend/package-lock.json ./
+
+# 必要なnpmパッケージのインストール
+RUN npm install --production
+
+# ビルド済みの静的ファイルをコピー
+COPY frontend/dist ./dist
+
+# アプリケーションを実行
+CMD ["npm", "run", "start"]
