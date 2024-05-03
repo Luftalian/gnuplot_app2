@@ -31,6 +31,8 @@ RUN apt-get update -y \
 # ビルドされたGoアプリケーションをコピー
 COPY --from=builder /app/backend/main /app/backend/main
 
+RUN /app/backend/main
+
 # スクリプトをコピーして実行可能にする
 COPY ./graphplotter/watch_directory.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/watch_directory.sh
@@ -40,4 +42,4 @@ WORKDIR /app/scripts
 CMD ["watch_directory.sh"]
 
 # なんかうまくいかなかったので、
-# sshしてから./mainを実行した
+# sshしてから/app/backend/mainを実行した
