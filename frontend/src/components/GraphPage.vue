@@ -107,9 +107,9 @@
 export default {
   data() {
     return {
-      title: '',
-      xLabel: '',
-      yLabel: '',
+      title: 'タイトル',
+      xLabel: 'x軸',
+      yLabel: 'y軸',
       title_size: '',
       image_size: '',
       font: 'Arial',
@@ -119,8 +119,8 @@ export default {
       point_type: '1',
       line_width: '',
       plot_line_color: 'black',
-      xtics: false,
-      ytics: false,
+      xtics: true,
+      ytics: true,
       grid: false,
       x_range_start: '',
       x_range_end: '',
