@@ -1,6 +1,8 @@
 # Gnuplotter
 https://gnuplotapp2f.trap.show/
 
+[![License](https://img.shields.io/github/license/Luftalian/gnuplot_app2)](https://github.com/Luftalian/gnuplot_app2/blob/main/LICENSE)
+
 ## 画面
 <p align="center">
   <img src="https://github.com/Luftalian/gnuplot_app2/assets/105796502/e8c137d7-75d1-498e-94b0-35ca63598d48" width=70% position=center>
