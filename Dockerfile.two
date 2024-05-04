@@ -25,7 +25,7 @@ FROM ubuntu:latest
 
 # 必要なパッケージのインストール
 RUN apt-get update -y \
-  && apt-get install -y inotify-tools gnuplot \
+  && apt-get install -y inotify-tools gnuplot fonts-ipafont \
   && rm -rf /var/lib/apt/lists/*
 
 # ビルドされたGoアプリケーションをコピー
@@ -35,10 +35,18 @@ COPY --from=builder /app/backend/main /app/backend/main
 COPY ./graphplotter/watch_directory.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/watch_directory.sh
 
+RUN mkdir /app/images
+
+RUN /app/backend/main &
+
 # 監視するディレクトリを指定してシェルスクリプトを実行
 WORKDIR /app/scripts
-CMD ["watch_directory.sh"]
+RUN watch_directory.sh
+
+ENTRYPOINT [ "./app/backend/main" ]
 
 # なんかうまくいかなかったので、
 # sshしてから`mkdir /app/images`と
 # `/app/backend/main &` + `Ctrl + C`を実行した
+# `apt-get update`と
+# `apt-get install fonts-ipafont`これも実行した
