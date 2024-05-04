@@ -41,9 +41,7 @@ RUN /app/backend/main &
 
 # 監視するディレクトリを指定してシェルスクリプトを実行
 WORKDIR /app/scripts
-RUN watch_directory.sh
-
-ENTRYPOINT [ "./app/backend/main" ]
+CMD ["watch_directory.sh"]
 
 # なんかうまくいかなかったので、
 # sshしてから`mkdir /app/images`と
