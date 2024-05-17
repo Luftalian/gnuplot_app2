@@ -36,6 +36,7 @@ COPY ./graphplotter/watch_directory.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/watch_directory.sh
 
 RUN mkdir /app/images
+RUN mkdir /app/data
 
 RUN /app/backend/main &
 

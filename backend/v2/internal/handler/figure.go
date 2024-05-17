@@ -46,6 +46,8 @@ func makeScript(fileName string, figure *Figure) (string, string, error) {
 	}
 	if figure.ImageSize == 0 {
 		figure.ImageSize = 1
+	} else if figure.ImageSize > 7 {
+		figure.ImageSize = 7
 	}
 	if figure.TitleSize == 0 {
 		figure.TitleSize = 10
