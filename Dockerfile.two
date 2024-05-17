@@ -35,17 +35,9 @@ COPY --from=builder /app/backend/main /app/backend/main
 COPY ./graphplotter/watch_directory.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/watch_directory.sh
 
-RUN mkdir /app/images
-RUN mkdir /app/data
+# 必要なディレクトリの作成
+RUN mkdir -p /app/images /app/data
 
-RUN /app/backend/main &
-
-# 監視するディレクトリを指定してシェルスクリプトを実行
+# アプリケーションと監視スクリプトを実行
 WORKDIR /app/scripts
-CMD ["watch_directory.sh"]
-
-# なんかうまくいかなかったので、
-# sshしてから`mkdir /app/images`と
-# `/app/backend/main &` + `Ctrl + C`を実行した
-# `apt-get update`と
-# `apt-get install fonts-ipafont`これも実行した
+CMD ["/bin/bash", "-c", "/app/backend/main & watch_directory.sh"]
