@@ -274,6 +274,13 @@ export default {
           },
         });
         alert(response.data.message);
+        if (response.status === 200) { // response.ok は Fetch API 用のプロパティ。axios では response.status で確認します。
+          // formDataからファイル名を取得
+          const uploadedFile = formData.get('file'); // 'file' は formData に追加したときのフィールド名に置き換えてください
+          if (uploadedFile) {
+            this.data_file_name = uploadedFile.name;
+          }
+        }
       } catch (error) {
         console.error("ファイルアップロード中にエラーが発生しました:", error);
         alert("ファイルアップロード中にエラーが発生しました。");
