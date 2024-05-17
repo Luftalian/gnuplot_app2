@@ -21,9 +21,14 @@
 
       <label for="comment_request">Comment Request:</label>
       <input type="text" id="comment_request" v-model="comment_request" />
+
+      <label for="data_file_name">Data File Name:</label>
+      <input type="text" id="data_file_name" v-model="data_file_name" />
     </form>
-    <img :src="graphImage" alt="Graph Image" v-if="graphImage">
-    <div v-else>Loading...</div>
+    <div id="image_container">
+      <img :src="graphImage" alt="Graph Image" v-if="graphImage">
+      <div v-else>Loading...</div>
+    </div>
     <form class="form1">
       <br>
       <label for="title">Graph Title:</label>
@@ -44,6 +49,8 @@
       <!-- default is 'Arial' -->
       <label for="font">Font:</label>
       <input type="text" id="font" v-model="font" />
+      <label for="key_value">Key Value</label>
+      <input type="text" id="key_value" v-model="key_value" />
       <label for="key_position">Key Position:</label>
       <select id="key_position" v-model="key_position">
         <option value="top left">top left</option>
@@ -100,19 +107,29 @@
       <input type="checkbox" id="grid" v-model="grid" />
     </form>
 
+    <form class="upload-form">
+      <h2>ファイルアップロード</h2>
+      <input type="file" @change="onFileChange" />
+      <button type="button" @click="uploadFile">アップロード</button>
+    </form>
+
   </div>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
       title: 'タイトル',
+      data_file_name: '',
       xLabel: 'x軸',
       yLabel: 'y軸',
       title_size: '',
       image_size: '',
       font: 'Arial',
+      key_value: 'Data',
       key_position: 'top right',
       points_or_line: 'points',
       points_size: '',
@@ -128,7 +145,8 @@ export default {
       y_range_end: '',
       plot_script: '',
       comment_request: '',
-      graphImage: null
+      graphImage: null,
+      file: null
     };
   },
   async mounted() {
@@ -137,11 +155,13 @@ export default {
   watch: {
     // 監視対象のデータ
     title: 'submitForm',
+    data_file_name: 'submitForm',
     xLabel: 'submitForm',
     yLabel: 'submitForm',
     title_size: 'submitForm',
     image_size: 'submitForm',
     font: 'submitForm',
+    key_value: 'submitForm',
     key_position: 'submitForm',
     points_or_line: 'submitForm',
     points_size: 'submitForm',
@@ -166,11 +186,13 @@ export default {
         user_id: 123,
         figure_data: {
           title: this.title,
+          data_file_name: this.data_file_name,
           title_size: parseInt(this.title_size),
           x_label: this.xLabel,
           y_label: this.yLabel,
           image_size: parseFloat(this.image_size),
           font: this.font,
+          key_value: this.key_value,
           key_position: this.key_position,
           points_or_line: this.points_or_line,
           points_size: parseInt(this.points_size),
@@ -213,6 +235,7 @@ export default {
     },
     async sendGraphData(data) {
       try {
+        this.graphImage = null;
         const baseUrl = process.env.VUE_APP_BACKEND_URL;
         const response = await fetch(`${baseUrl}/api/v2/files/edit`, {
           method: 'POST',
@@ -229,6 +252,31 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching graph image:', error);
+      }
+    },
+    onFileChange(event) {
+      this.file = event.target.files[0];
+    },
+    async uploadFile() {
+      if (!this.file) {
+        alert("ファイルを選択してください。");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", this.file);
+
+      try {
+        const baseUrl = process.env.VUE_APP_BACKEND_URL;
+        const response = await axios.post(`${baseUrl}/api/v2/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        alert(response.data.message);
+      } catch (error) {
+        console.error("ファイルアップロード中にエラーが発生しました:", error);
+        alert("ファイルアップロード中にエラーが発生しました。");
       }
     }
   }
@@ -276,11 +324,6 @@ form > * {
   grid-column: 1 / -1;
 }
 
-/* グラフ画像を非表示にする
-img:not([!v-if]) {
-  display: none;
-} */
-
 /* 親要素のスタイル */
 div {
   display: flex;
@@ -308,8 +351,24 @@ form {
   margin-top: 0;
 }
 
+/* グラフ画像のスタイル */
 img {
-  width: 40%; /* 幅を30%に */
-  /* max-width: 400px; 最大幅 */
+  width: 100%;
+}
+
+#image_container {
+  width: 600px; /* 固定幅 */
+  height: auto;
+  border: 1px solid #ccc; /* 境界線を追加 */
+  padding: 10px;
+  box-sizing: border-box; /* パディングを幅に含める */
+  display: flex;
+  justify-content: center; /* コンテンツを中央揃え */
+  align-items: center; /* コンテンツを中央揃え */
+}
+
+#image_container div {
+  width: 100%; /* ローディングメッセージの幅を親に合わせる */
+  text-align: center; /* ローディングメッセージを中央揃え */
 }
 </style>

@@ -1,15 +1,21 @@
 package handler
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"os"
+)
 
 type (
 	Figure struct {
+		DataFileName  string  `json:"data_file_name"`
 		Title         string  `json:"title"`
 		TitleSize     int     `json:"title_size"`
 		XLabel        string  `json:"x_label"`
 		YLabel        string  `json:"y_label"`
 		ImageSize     float64 `json:"image_size"`
 		Font          string  `json:"font"`
+		KeyValue      string  `json:"key_value"`
 		KeyPosition   string  `json:"key_position"`
 		PointsOrLine  string  `json:"points_or_line"`
 		PointsSize    int     `json:"points_size"`
@@ -29,6 +35,15 @@ type (
 
 func makeScript(fileName string, figure *Figure) (string, string, error) {
 	outputPath := "/app/images/" + fileName + "_plot.png"
+	if figure.DataFileName == "" {
+		return "", "", errors.New("no data")
+	} else {
+		// Check if figure.DataFileName exists in /app/data
+		dataFilePath := "/app/data/" + figure.DataFileName
+		if _, err := os.Stat(dataFilePath); os.IsNotExist(err) {
+			return "", "", errors.New("data file does not exist")
+		}
+	}
 	if figure.ImageSize == 0 {
 		figure.ImageSize = 1
 	}
@@ -65,7 +80,7 @@ func makeScript(fileName string, figure *Figure) (string, string, error) {
 	if !figure.Grid {
 		grid = "#"
 	}
-	isPoint := `pt ` + figure.PointType + ` pointsize ` + fmt.Sprint(figure.PointsSize) + `*image_size lc rgb "` + figure.PlotLineColor + `"`
+	isPoint := `pt ` + figure.PointType + ` pointsize ` + fmt.Sprint(figure.PointsSize) + `*image_size linewidth ` + fmt.Sprint(figure.LineWidth) + `*image_size lc rgb "` + figure.PlotLineColor + `"`
 	isLine := `linecolor "` + figure.PlotLineColor + `" linewidth ` + figure.LineWidth + `*image_size`
 	if figure.PointsOrLine == "points" {
 		isLine = ""
@@ -101,13 +116,6 @@ func makeScript(fileName string, figure *Figure) (string, string, error) {
 	set style data linespoints
 	set key ` + figure.KeyPosition + `
 	
-	plot "-" using 1:2 title "Data" with ` + figure.PointsOrLine + ` ` + isPoint + ` ` + isLine + `
-	0.00 1.3331
-	9.44 1.3469
-	20.41 1.3649
-	31.47 1.3845
-	40.63 1.4012
-	e
-	`
+	plot "../data/` + figure.DataFileName + `" using 1:2 title "` + figure.KeyValue + `" with ` + figure.PointsOrLine + ` ` + isPoint + ` ` + isLine
 	return script, outputPath, nil
 }

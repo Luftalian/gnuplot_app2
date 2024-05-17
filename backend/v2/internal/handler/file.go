@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -64,7 +65,7 @@ func (h *Handler) EditFigure(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to make plot file").SetInternal(err)
 	}
 
-	err = sendPlotFile(outputPath, c)
+	err = sendPlotFile(outputPath, c, 0, 0)
 	if err != nil {
 		log.Printf("Error sending plot file: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to send plot file").SetInternal(err)
@@ -98,24 +99,38 @@ func makePlotFile(fileName, script string) error {
 	return nil
 }
 
-func sendPlotFile(outputPath string, c echo.Context) error {
+func sendPlotFile(outputPath string, c echo.Context, count int, beforeFileSize int64) error {
+	if count > 30 {
+		return errors.New("count over 100")
+	}
+
 	// ファイルを開く
 	file, err := os.Open(outputPath)
-
-	count := 0
-	for os.IsNotExist(err) && count < 100 {
+	if os.IsNotExist(err) {
 		// ファイルが存在しない場合は100ms待機して再度開く
 		count++
 		// 100ms待機
 		time.Sleep(100 * time.Millisecond)
-		file, err = os.Open(outputPath)
-	}
-
-	if err != nil {
+		return sendPlotFile(outputPath, c, count, 0)
+	} else if err != nil {
 		log.Printf("Error opening file: %v", err)
 		return err
 	}
 	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		log.Printf("failed to get file info: %v", err)
+		return err
+	}
+
+	if fileInfo.Size() != beforeFileSize || fileInfo.Size() == 0 {
+		// ファイルが書き込み中の場合は100ms待機して再度開く
+		count++
+		// 100ms待機
+		time.Sleep(100 * time.Millisecond)
+		return sendPlotFile(outputPath, c, count, fileInfo.Size())
+	}
 
 	// レスポンスにファイルの内容をコピー
 	_, err = io.Copy(c.Response().Writer, file)

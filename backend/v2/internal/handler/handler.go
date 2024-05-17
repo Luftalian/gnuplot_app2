@@ -36,4 +36,10 @@ func (h *Handler) SetupRoutes(api *echo.Group) {
 	{
 		filesAPI.POST("/edit", h.EditFigure)
 	}
+
+	// upload API
+	uploadAPI := api.Group("/upload")
+	{
+		uploadAPI.POST("", h.UploadFile)
+	}
 }

@@ -1,0 +1,38 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:latest as builder
+
+WORKDIR /app/backend
+
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOARCH=amd64
+ENV GOCACHE=/root/.cache/go-build
+ENV GOMODCACHE=/go/pkg/mod
+
+# COPY go.mod go.sum ./
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=${GOCACHE} \
+  --mount=type=cache,target=${GOMODCACHE} \
+  go mod download
+
+# COPY ./ ./
+COPY ./ ./
+# RUN --mount=type=cache,target=${GOMODCACHE} go build -o /app/main
+RUN --mount=type=cache,target=${GOCACHE} \
+  --mount=type=cache,target=${GOMODCACHE} \
+  go build -o /app/backend/main
+
+# FROM gcr.io/distroless/static-debian11:latest
+
+# WORKDIR /app
+
+# COPY --from=builder /app/main /app/main
+
+# USER nonroot:nonroot
+
+# COPY .imaages /app/images
+
+WORKDIR /app
+
+CMD ["/app/backend/main"]
